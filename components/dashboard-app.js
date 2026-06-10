@@ -472,14 +472,9 @@ export function DashboardApp({ initialTab = 'dashboard' }) {
           <div className="grid grid-cols-2 gap-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-8">
             {[   
               ['Today Expense', stats.todayExpense],
-              ['Weekly Expense', stats.weeklyExpense],
-              ['Monthly Expense', stats.monthlyExpense],
-              ['Overall Expense', stats.expenseTotal],
-              ['Payment Total', stats.paymentTotal],
-              ['Net Pending', stats.netPendingTotal],
-              ['Today Pending', Math.max(stats.todayExpense - stats.todayPayment, 0)],
-              ['People', personOptions.length],
-              ['Unread', unreadCount]
+  ['Monthly Expense', stats.monthlyExpense],
+  ['Payment Total', stats.paymentTotal],
+  ['Net Pending', stats.netPendingTotal]
             ].map(([label, value]) => (
               <div key={label} className="rounded-2xl bg-zinc-100 p-2 md:p-3 dark:bg-zinc-900">
                 <div className="text-xs text-zinc-500 dark:text-zinc-400">{label}</div>
@@ -497,7 +492,7 @@ export function DashboardApp({ initialTab = 'dashboard' }) {
           <Card>
             <div className="flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between">
               <SectionTitle eyebrow="Records" title="Recent Entries" subtitle="Search, filter, edit, delete, and move to payment received." />
-              <div className="grid grid-cols-2 gap-2 md:flex md:flex-wrap">
+              <div className="grid grid-cols-1 gap-2 sm:grid-cols-2 md:flex md:flex-wrap">
                 <Button variant="secondary" onClick={selectAll}><CheckSquare className="mr-2 h-4 w-4" />Select All</Button>
                 <Button variant="secondary" onClick={clearSelection}><Square className="mr-2 h-4 w-4" />Clear</Button>
                 <Button variant="secondary" onClick={() => bulkAction('moveToPayment')}><MoveRight className="mr-2 h-4 w-4" />Move To Payment Received</Button>
@@ -556,7 +551,7 @@ export function DashboardApp({ initialTab = 'dashboard' }) {
                   {activeTransactions.map((tx) => (
                     <div
                       key={tx.id}
-                      className="border-b border-zinc-800 p-4"
+                      className="m-2 rounded-2xl border border-zinc-200 p-4 dark:border-zinc-800"
                     >
                       <div className="flex items-center justify-between">
                         <Badge tone={transactionTone(tx)}>
@@ -570,15 +565,21 @@ export function DashboardApp({ initialTab = 'dashboard' }) {
                         />
                       </div>
 
-                      <div className="mt-3">
-                        <div className="text-lg font-semibold">
-                          {fromPaise(tx.amountPaise)}
-                        </div>
+                      <div className="mt-3 flex items-start justify-between">
+  <div>
+    <div className="text-lg font-bold">
+      {fromPaise(tx.amountPaise)}
+    </div>
 
-                        <div className="text-sm text-zinc-400">
-                          {tx.personName}
-                        </div>
-                      </div>
+    <div className="text-sm text-zinc-400">
+      {tx.personName}
+    </div>
+  </div>
+
+  <div className="text-xs text-zinc-500">
+    {fmtDateTime(tx.entryAt)}
+  </div>
+</div>
 
                       <div className="mt-2 text-sm">
                         <div>{tx.itemPurpose || 'No Item'}</div>
