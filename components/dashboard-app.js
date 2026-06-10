@@ -461,7 +461,7 @@ export function DashboardApp({ initialTab = 'dashboard' }) {
               <div className="text-sm text-zinc-500 dark:text-zinc-400">Open, add, and calculate in seconds.</div>
             </div>
             <div className="sticky top-0 z-20 bg-zinc-50 pb-3 dark:bg-black">
-              <div className="flex flex-wrap gap-2">
+              <div className="grid grid-cols-1 gap-2 sm:flex sm:flex-wrap">
                 <Button onClick={() => openCreate('EXPENSE')}><Plus className="mr-2 h-4 w-4" />Add Expense</Button>
                 <Button variant="secondary" onClick={() => openCreate('PAYMENT')}><CircleDollarSign className="mr-2 h-4 w-4" />Add Payment Received</Button>
                 <Button variant="secondary" onClick={() => loadBootstrap()}><RefreshCw className="mr-2 h-4 w-4" />Refresh</Button>
@@ -469,7 +469,7 @@ export function DashboardApp({ initialTab = 'dashboard' }) {
             </div>
           </div>
 
-          <div className="grid grid-cols-2 gap-2 md:grid-cols-4 xl:grid-cols-8">
+          <div className="grid grid-cols-2 gap-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-8">
             {[   
               ['Today Expense', stats.todayExpense],
               ['Weekly Expense', stats.weeklyExpense],
@@ -506,7 +506,7 @@ export function DashboardApp({ initialTab = 'dashboard' }) {
               </div>
             </div>
 
-            <div className="mt-4 grid gap-3 md:grid-cols-2 xl:grid-cols-6">
+            <div className="mt-4 grid grid-cols-1 gap-2 sm:grid-cols-2 xl:grid-cols-6">
               <Input placeholder="Search" value={txFilters.q} onChange={(e) => setTxFilters({ ...txFilters, q: e.target.value })} />
               <Select value={txFilters.personId} onChange={(e) => setTxFilters({ ...txFilters, personId: e.target.value })}>
                 <option value="">All People</option>
@@ -551,7 +551,96 @@ export function DashboardApp({ initialTab = 'dashboard' }) {
                 {loading ? (
                   <div className="p-6 text-sm text-zinc-500">Loading records…</div>
                 ) : activeTransactions.length ? (
-                  <table className="w-full text-left text-sm">
+                  <>
+                <div className="md:hidden">
+                  {activeTransactions.map((tx) => (
+                    <div
+                      key={tx.id}
+                      className="border-b border-zinc-800 p-4"
+                    >
+                      <div className="flex items-center justify-between">
+                        <Badge tone={transactionTone(tx)}>
+                          {transactionLabel(tx)}
+                        </Badge>
+
+                        <input
+                          type="checkbox"
+                          checked={selected.includes(tx.id)}
+                          onChange={() => toggleSelection(tx.id)}
+                        />
+                      </div>
+
+                      <div className="mt-3">
+                        <div className="text-lg font-semibold">
+                          {fromPaise(tx.amountPaise)}
+                        </div>
+
+                        <div className="text-sm text-zinc-400">
+                          {tx.personName}
+                        </div>
+                      </div>
+
+                      <div className="mt-2 text-sm">
+                        <div>{tx.itemPurpose || 'No Item'}</div>
+
+                        <div className="text-zinc-500">
+                          {tx.category || 'No Category'}
+                        </div>
+                      </div>
+
+                      <div className="mt-2 text-xs text-zinc-500">
+                        {fmtDateTime(tx.entryAt)}
+                      </div>
+
+                      <div className="mt-3 flex flex-wrap gap-2">
+                        <Button
+                          variant="ghost"
+                          onClick={() => openEdit(tx)}
+                        >
+                          <Edit3 className="h-4 w-4" />
+                        </Button>
+
+                        <Button
+                          variant="ghost"
+                          onClick={() => deleteTransaction(tx.id)}
+                        >
+                          <Trash2 className="h-4 w-4" />
+                        </Button>
+
+                        {tx.type === 'EXPENSE' && (
+                          <Button
+                            variant="ghost"
+                            onClick={() => moveTransactionToPayment(tx.id)}
+                          >
+                            <MoveRight className="h-4 w-4" />
+                          </Button>
+                        )}
+
+                        <Button
+                          variant="ghost"
+                          onClick={() => {
+                            setEditorForm({
+                              ...blankForm(),
+                              type: tx.type,
+                              personId: tx.personId,
+                              amount: String(tx.amountPaise / 100),
+                              itemPurpose: tx.itemPurpose || '',
+                              category: tx.category || '',
+                              remarks: tx.remarks || '',
+                              date: todayDate(),
+                              time: nowTime()
+                            });
+                            setEditorOpen(true);
+                            setEditingTx(null);
+                          }}
+                        >
+                          <Repeat2 className="h-4 w-4" />
+                        </Button>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+                  <table className="hidden md:table w-full text-left text-sm">
                     <thead className="sticky top-0 bg-zinc-100 text-xs uppercase tracking-wide text-zinc-500 dark:bg-zinc-900 dark:text-zinc-400">
                       <tr>
                         <th className="p-3"><input type="checkbox" checked={selected.length && selected.length === activeTransactions.length} onChange={() => selected.length === activeTransactions.length ? clearSelection() : selectAll()} /></th>
@@ -603,6 +692,7 @@ export function DashboardApp({ initialTab = 'dashboard' }) {
                       ))}
                     </tbody>
                   </table>
+                  </>
                 ) : (
                   <div className="p-6">
                     <EmptyState
@@ -617,7 +707,7 @@ export function DashboardApp({ initialTab = 'dashboard' }) {
           </Card>
 
           <div className="space-y-4">
-            <Card>
+            <Card className="hidden xl:block">
               <SectionTitle eyebrow="Quick Add" title="Recent & Favorite Items" subtitle="One tap repeat for common expenses." />
               <div className="mt-4 grid gap-2">
                 {recentItems.length ? recentItems.map((item) => (
@@ -721,7 +811,7 @@ export function DashboardApp({ initialTab = 'dashboard' }) {
                   ['Payment', report?.totals?.paymentTotal || 0],
                   ['Pending', report?.totals?.netPendingTotal || 0]
                 ].map(([label, value]) => (
-                  <div key={label} className="rounded-2xl bg-zinc-100 p-3 dark:bg-zinc-900">
+                  <div key={label} className="rounded-2xl bg-zinc-100 p-2 sm:p-3 dark:bg-zinc-900">
                     <div className="text-xs text-zinc-500 dark:text-zinc-400">{label}</div>
                     <div className="mt-1 text-lg font-semibold">{fromPaise(value)}</div>
                   </div>
@@ -846,7 +936,7 @@ export function DashboardApp({ initialTab = 'dashboard' }) {
       Quick Entry
     </label>
 
-    <div className="flex flex-wrap gap-2">
+    <div className="grid grid-cols-2 gap-2 lg:flex lg:flex-wrap">
             {QUICK_ITEMS.map((quick) => (
               <button
                 key={quick.item}
