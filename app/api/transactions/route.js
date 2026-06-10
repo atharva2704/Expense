@@ -34,7 +34,7 @@ export async function GET(request) {
     const transactions = await prisma.transaction.findMany({
       where,
       orderBy: { entryAt: 'desc' },
-      take: Math.min(Number(searchParams.get('limit') || 1000), 5000)
+      take: Math.min(Number(searchParams.get('limit') || 100), 500)
     });
 
     const balanceMap = getBalanceMap(allTransactions);

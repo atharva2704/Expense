@@ -94,7 +94,7 @@ export function DashboardApp({ initialTab = 'dashboard' }) {
   const [theme, setTheme] = useState('dark');
   const [activeTab, setActiveTab] = useState(initialTab);
   const [loading, setLoading] = useState(true);
-  const [boot, setBoot] = useState(null);
+  const [user, setUser] = useState(null);
   const [transactions, setTransactions] = useState([]);
   const [balances, setBalances] = useState([]);
   const [notifications, setNotifications] = useState([]);
@@ -156,13 +156,13 @@ export function DashboardApp({ initialTab = 'dashboard' }) {
     setLoading(true);
     try {
       const data = await api('/api/bootstrap');
-      setBoot(data);
+      setUser(data.user || null);
       setPeople(data.people || []);
       setFavorites(data.favorites || []);
       setNotifications(data.notifications || []);
       setUnreadCount(data.unreadCount || 0);
-      setBalances(data.personBalances || []);
-      setTransactions(data.recentTransactions || []);
+      // setBalances(data.personBalances || []);
+      // setTransactions(data.recentTransactions || []);
       setReport(data.summary || null);
     } catch (err) {
       setMessage(err.message || 'Failed to load data');
@@ -174,7 +174,7 @@ export function DashboardApp({ initialTab = 'dashboard' }) {
 
   async function loadTransactions(filters = txFilters) {
     const params = new URLSearchParams();
-    params.set('limit', '5000');
+    params.set('limit', '100');
     Object.entries(filters).forEach(([key, value]) => {
       if (value !== '' && value !== 'all' && value !== false && value != null) {
         params.set(key, String(value));
@@ -404,7 +404,7 @@ export function DashboardApp({ initialTab = 'dashboard' }) {
     return people.filter((p) => p.name.toLowerCase().includes(personSearch.toLowerCase()));
   }, [people, personSearch]);
 
-  const stats = boot?.summary?.totals || {
+  const stats = report?.totals || {
     todayExpense: 0,
     todayPayment: 0,
     weeklyExpense: 0,
@@ -438,7 +438,7 @@ export function DashboardApp({ initialTab = 'dashboard' }) {
 
   return (
     <AppShell
-      user={boot?.user}
+      user={user}
       active={activeTab}
       unread={unreadCount}
       onToggleTheme={toggleTheme}

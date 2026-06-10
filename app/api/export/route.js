@@ -57,7 +57,7 @@ export async function GET(request) {
 
     const [people, transactions, notifications, favorites] = await Promise.all([
       prisma.person.findMany({ where: { workspaceId: workspace.id } }),
-      prisma.transaction.findMany({ where: { workspaceId: workspace.id, deletedAt: null }, orderBy: { entryAt: 'desc' } }),
+      prisma.transaction.findMany({ where: { workspaceId: workspace.id, deletedAt: null }, orderBy: { entryAt: 'desc' }, take: 100 }),
       prisma.notification.findMany({ where: { workspaceId: workspace.id }, orderBy: { createdAt: 'desc' } }),
       prisma.favoriteItem.findMany({ where: { workspaceId: workspace.id }, orderBy: { createdAt: 'desc' } })
     ]);

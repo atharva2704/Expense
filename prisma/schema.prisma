@@ -78,6 +78,9 @@ model Transaction {
   @@index([workspaceId, entryAt])
   @@index([workspaceId, personId, entryAt])
   @@index([workspaceId, type, entryAt])
+  @@index([workspaceId, deletedAt])
+  @@index([workspaceId, isPending])
+  @@index([workspaceId, category])
 }
 
 model Notification {
