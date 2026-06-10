@@ -1,0 +1,7 @@
+<?xml version='1.0' encoding='utf-8'?>
+<resources>
+    <string name="app_name">Expense Tracker Pro</string>
+    <string name="title_activity_main">Expense Tracker Pro</string>
+    <string name="package_name">com.expensetracker.pro</string>
+    <string name="custom_url_scheme">com.expensetracker.pro</string>
+</resources>

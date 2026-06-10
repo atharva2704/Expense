@@ -1,0 +1,125 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum TransactionType {
+  EXPENSE
+  PAYMENT
+}
+
+enum NotificationType {
+  PAYMENT_RECEIVED
+  PENDING_ADDED
+  BALANCE_REDUCED
+  BALANCE_CLEARED
+  RECORD_DELETED
+  BULK_DELETE
+  PERSON_ADDED
+  PERSON_EDITED
+  PERSON_DELETED
+  TRANSACTION_EDITED
+  FAVORITE_ADDED
+  FAVORITE_EDITED
+  FAVORITE_DELETED
+  IMPORT_COMPLETED
+  EXPORT_COMPLETED
+}
+
+model User {
+  id           String      @id @default(cuid())
+  name         String?
+  email        String      @unique
+  passwordHash String
+  createdAt    DateTime    @default(now())
+  updatedAt    DateTime    @updatedAt
+  sessions     Session[]
+  workspaces   Workspace[]
+}
+
+model Workspace {
+  id          String        @id @default(cuid())
+  ownerId     String
+  name        String
+  createdAt   DateTime      @default(now())
+  updatedAt   DateTime      @updatedAt
+  owner       User          @relation(fields: [ownerId], references: [id])
+  people      Person[]
+  transactions Transaction[]
+  notifications Notification[]
+  favorites   FavoriteItem[]
+  @@index([ownerId])
+}
+
+model Session {
+  id         String   @id @default(cuid())
+  token      String   @unique
+  userId     String
+  expiresAt  DateTime
+  createdAt  DateTime @default(now())
+  user       User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  @@index([userId])
+}
+
+model Person {
+  id          String      @id @default(cuid())
+  workspaceId String
+  name        String
+  isDefault   Boolean     @default(false)
+  archivedAt  DateTime?
+  createdAt   DateTime    @default(now())
+  updatedAt   DateTime    @updatedAt
+  workspace   Workspace   @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+  transactions Transaction[]
+  @@index([workspaceId, name])
+}
+
+model Transaction {
+  id              String         @id @default(cuid())
+  workspaceId     String
+  personId        String
+  type            TransactionType
+  amountPaise     Int
+  itemPurpose     String?
+  category        String?
+  remarks         String?
+  isPending       Boolean        @default(true)
+  entryAt         DateTime       @default(now())
+  createdAt       DateTime       @default(now())
+  updatedAt       DateTime       @updatedAt
+  deletedAt       DateTime?
+  workspace       Workspace      @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+  person          Person         @relation(fields: [personId], references: [id])
+  @@index([workspaceId, entryAt])
+  @@index([workspaceId, personId, entryAt])
+  @@index([workspaceId, type, entryAt])
+}
+
+model Notification {
+  id          String      @id @default(cuid())
+  workspaceId String
+  type        NotificationType
+  title       String
+  body        String
+  meta        Json?
+  isRead      Boolean     @default(false)
+  createdAt   DateTime    @default(now())
+  workspace   Workspace   @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+  @@index([workspaceId, isRead, createdAt])
+}
+
+model FavoriteItem {
+  id          String   @id @default(cuid())
+  workspaceId String
+  label       String
+  category    String?
+  amountPaise Int?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  workspace   Workspace @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+  @@index([workspaceId, label])
+}
