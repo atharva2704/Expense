@@ -287,7 +287,10 @@ export function DashboardApp({ initialTab = 'dashboard' }) {
       setEditorOpen(false);
       setEditingTx(null);
       setEditorForm(blankForm());
-      await Promise.all([loadBootstrap(), loadTransactions(txFilters)]);
+      await Promise.all([
+  loadTransactions(txFilters),
+  loadReport()
+]);
     } catch (err) {
       showMessage(err.message || 'Save failed', 'red');
     }
@@ -297,13 +300,19 @@ export function DashboardApp({ initialTab = 'dashboard' }) {
     if (!window.confirm('Delete this record?')) return;
     await api(`/api/transactions/${id}`, { method: 'DELETE' });
     showMessage('Record deleted', 'yellow');
-    await Promise.all([loadBootstrap(), loadTransactions(txFilters)]);
+    await Promise.all([
+  loadTransactions(txFilters),
+  loadReport()
+]);
   }
 
   async function moveTransactionToPayment(id) {
     await api('/api/transactions/bulk', { method: 'POST', body: { action: 'moveToPayment', ids: [id], filters: txFilters } });
     showMessage('Moved to payment received', 'green');
-    await Promise.all([loadBootstrap(), loadTransactions(txFilters)]);
+    await Promise.all([
+  loadTransactions(txFilters),
+  loadReport()
+]);
   }
 
   function toggleSelection(id) {
@@ -333,7 +342,10 @@ export function DashboardApp({ initialTab = 'dashboard' }) {
     await api('/api/transactions/bulk', { method: 'POST', body: payload });
     setSelected([]);
     showMessage('Action completed', 'green');
-    await Promise.all([loadBootstrap(), loadTransactions(txFilters)]);
+    await Promise.all([
+  loadTransactions(txFilters),
+  loadReport()
+]);
   }
 
   async function markNotificationRead(id, nextRead = true) {
@@ -357,7 +369,10 @@ export function DashboardApp({ initialTab = 'dashboard' }) {
     const path = personForm.id ? `/api/people/${personForm.id}` : '/api/people';
     await api(path, { method: personForm.id ? 'PATCH' : 'POST', body: { name: personForm.name } });
     setPersonForm({ id: '', name: '' });
-    await Promise.all([loadBootstrap(), activeTab === 'reports' ? loadReport() : Promise.resolve()]);
+    await Promise.all([
+  loadTransactions(txFilters),
+  loadReport()
+]);
   }
 
   async function archivePerson(id) {
@@ -392,7 +407,10 @@ export function DashboardApp({ initialTab = 'dashboard' }) {
       formData.append('mode', importMode);
       await api('/api/import', { method: 'POST', body: formData, isForm: true });
       showMessage('Import completed', 'green');
-      await Promise.all([loadBootstrap(), loadTransactions(txFilters), loadReport()]);
+      await Promise.all([
+  loadTransactions(txFilters),
+  loadReport()
+]);
     } catch (err) {
       showMessage(err.message || 'Import failed', 'red');
     } finally {
